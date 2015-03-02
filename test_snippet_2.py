@@ -3,8 +3,7 @@ from PIL import Image
 import numpy as np
 from os import listdir
 import operator
-
-text_file_name = ''
+import pyttsx
 
 def classify0(inX, dataSet, labels, k):
 	# inX - input vector to classify
@@ -29,28 +28,6 @@ def classify0(inX, dataSet, labels, k):
 	# print sortedClassCount
 	return sortedClassCount[0][0]
 
-def img2txt(filename):
-	print filename + "img2txt"
-	img = Image.open(filename)
-
-	x = list(img.getdata())
-	print 'HEREE IS THE IMG DATA'
-	for k in x:
-	        print k
-	global text_file_name
-	text_file_name = filename.split('_')[0]+'.txt'
-	fo = open(text_file_name,"w")
-
-	for i in range(32):
-		for j in range(32):	
-			if x[32*i+j] < (128, 128, 128, 128):
-				fo.write('0')
-			else:
-				fo.write('1')
-		fo.write('\n')
-	fo.close()
-	return 1
-
 def txt2vector(filename):
 	returnVect = np.zeros((1,1024))
 	fr = open(filename)
@@ -59,6 +36,7 @@ def txt2vector(filename):
 		for j in range(32):
 			returnVect[0,32*i+j] = int(lineStr[j])
 	return returnVect
+
 
 def numberClassifier():
 	labels = []
@@ -74,26 +52,20 @@ def numberClassifier():
 		labels.append(classNumStr)
 		trainingMat[i,:] = txt2vector("trainingDigits/%s" % fileNameStr)
 		#testFileList = listdir('testDigits')
-	global text_file_name	
-	vector_to_be_tested = txt2vector(text_file_name)
-	# print "reached here"
-	# print labels
+
+	vector_to_be_tested = txt2vector('result_2.txt')
+##	print "reached here"
+##	print labels
 	classifier_result = classify0(vector_to_be_tested,trainingMat,labels,3)
 	return classifier_result
 
-image_name = raw_input("enter name of image to open!")
 
-#resizing the image to 32 X 32 pixels
+result = numberClassifier()
+print result
+engine = pyttsx.init()
+engine.setProperty('rate', 70)
+engine.say("The number is")
+engine.say(str(result))
+engine.runAndWait()
 
-img = Image.open(image_name)
-img = img.resize((32,32),PIL.Image.ANTIALIAS)
-save_as = image_name.split('.')[0] + '_small.png'
-img.save(save_as)
-
-if img2txt(save_as)==1:
-	print "image converted to txt successfully!"
-
-print "number in the image identified as: "
-print numberClassifier()
-
-raw_input()
+    
