@@ -53,7 +53,7 @@ def numberClassifier():
 		trainingMat[i,:] = txt2vector("trainingDigits/%s" % fileNameStr)
 		#testFileList = listdir('testDigits')
 
-	vector_to_be_tested = txt2vector('result_2.txt')
+	vector_to_be_tested = txt2vector('result_4.txt')
 ##	print "reached here"
 ##	print labels
 	classifier_result = classify0(vector_to_be_tested,trainingMat,labels,3)
@@ -62,6 +62,7 @@ def numberClassifier():
 
 result = numberClassifier()
 print result
+
 engine = pyttsx.init()
 engine.setProperty('rate', 70)
 engine.say("The number is")
