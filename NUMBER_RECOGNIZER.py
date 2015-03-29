@@ -5,6 +5,9 @@ import PIL
 from PIL import Image
 import pyttsx
 import operator
+from progressbar import ProgressBar
+
+pbar = ProgressBar()
 
 def classify0(inX, dataSet, labels, k):
     # inX - input vector to classify
@@ -26,7 +29,7 @@ def classify0(inX, dataSet, labels, k):
         classCount[voteIlabel] = classCount.get(voteIlabel,0) + 1
     sortedClassCount = sorted(classCount.iteritems(),key=operator.itemgetter(1),reverse=True)
     # print classCount
-    # print sortedClassCount
+    print sortedClassCount
     return sortedClassCount[0][0]
     
 def img2txt(filename,imagedata):
@@ -52,16 +55,16 @@ def txt2vector(filename):
     return returnVect
 
 
-    
+
 file_list = [f for f in os.listdir('./testDigits/') if f.endswith('.png') or f.endswith('.jpg') or f.endswith('.gif')]
 print file_list
 
-#prepare training matrix
+print "preparing training matrix..."
 labels = []
 trainingFileList = listdir('trainingDigits')
 m = len(trainingFileList)
 trainingMat = np.zeros((m,1024))
-for i in range(m):
+for i in pbar(range(m)):
         fileNameStr = trainingFileList[i]
         fileStr = fileNameStr.split('.')[0]
         classNumStr = int(fileStr.split('_')[0])
@@ -92,7 +95,7 @@ for filename in file_list:
         file_vector = txt2vector(txt_file_name)
         
 
-        classifier_result = classify0(file_vector,trainingMat,labels,3)
+        classifier_result = classify0(file_vector,trainingMat,labels,5)
 
         #audio configurations
         engine = pyttsx.init()
@@ -100,4 +103,12 @@ for filename in file_list:
         engine.say(str(classifier_result))
         #playing audio
         engine.runAndWait()
+        #check answer
+        reply = raw_input("was the result correct?(y/n)")
+        if(reply=='n' or reply=='N'):
+            correct_digit = raw_input("Enter the correct digit..")
+            check_string = correct_digit+'_'
+            check_file_list = [f for f in os.listdir('./trainingDigits/') if f.startswith(check_string)]
+            new_file_name = check_string+str(len(check_file_list))+'.txt'
+            os.rename(txt_file_name, "trainingDigits/"+new_file_name)
         print "END "+ filename
