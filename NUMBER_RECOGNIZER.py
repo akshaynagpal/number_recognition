@@ -1,6 +1,7 @@
 import os
 from os import listdir
-import numpy as np
+from numpy import tile
+from numpy import zeros
 import PIL
 from PIL import Image
 import pyttsx
@@ -15,21 +16,41 @@ def classify0(inX, dataSet, labels, k):
     # labels - vector of lables
     # k - no.of nearest neghbours to use 
     dataSetSize = dataSet.shape[0] #shape[0] gives no. of rows
-    diffMat = np.tile(inX,(dataSetSize,1)) - dataSet
+    diffMat = tile(inX,(dataSetSize,1)) - dataSet
+    """
+    inX is a Python list; this line replicates inX a total of dataSetSize times.
+    The tile function here takes two parameters: the first is what you want to
+    replicate,and the second is how you want to replicate it.
+    The second parameter here is the tuple (dataSetSize, 1),
+    meaning that inX is replicated in a grid of dataSetSize rows and 1 column.
+    (That is, it's replicated dataSetSize times going down, but only once going across.) 
+    """
     #numpy.tile(A, reps)
     #Construct an array by repeating A the number of times given by reps.
     sqDiffMat = diffMat**2
     sqDistances = sqDiffMat.sum(axis=1)
+    """
+    axis=1 means sum of each row of the array
+    If you leave out 'axis=1', you get the sum of the entire array, and
+    not what we want. If you use axis=0 instead of axis=1,
+    you get the sum of the columns, which again is not useful.
+    """
     distances = sqDistances**0.5
     # print distances
     sortedDistIndices = distances.argsort()
+    """
+    Now that we have all of the distances, we want the k smallest ones.
+    So we want to sort the distances. This line creates a vector consisting
+    of the order of the _indices_ (not values) from 'distances', in
+    ascending order.
+    """
     classCount={}
     for i in range(k):
         voteIlabel = labels[sortedDistIndices[i]]
         classCount[voteIlabel] = classCount.get(voteIlabel,0) + 1
     sortedClassCount = sorted(classCount.iteritems(),key=operator.itemgetter(1),reverse=True)
     # print classCount
-    print sortedClassCount
+    # print sortedClassCount
     return sortedClassCount[0][0]
     
 def img2txt(filename,imagedata):
@@ -46,7 +67,7 @@ def img2txt(filename,imagedata):
     return text_file_name
 
 def txt2vector(filename):
-    returnVect = np.zeros((1,1024))
+    returnVect = zeros((1,1024))
     fr = open(filename)
     for i in range(32):
         lineStr = fr.readline()
@@ -55,22 +76,22 @@ def txt2vector(filename):
     return returnVect
 
 
-
+print "FILES TO BE SCANNED ARE:"
 file_list = [f for f in os.listdir('./testDigits/') if f.endswith('.png') or f.endswith('.jpg') or f.endswith('.gif')]
 print file_list
 
-print "preparing training matrix..."
+print "PREPARING TRAINING MATRIX..."
 labels = []
 trainingFileList = listdir('trainingDigits')
 m = len(trainingFileList)
-trainingMat = np.zeros((m,1024))
+trainingMat = zeros((m,1024))
 for i in pbar(range(m)):
         fileNameStr = trainingFileList[i]
         fileStr = fileNameStr.split('.')[0]
         classNumStr = int(fileStr.split('_')[0])
         labels.append(classNumStr)
         trainingMat[i,:] = txt2vector("trainingDigits/%s" % fileNameStr)
-print "training matrix prepared"
+print "TRAINING MATRIX PREPARED"
 
 
 for filename in file_list:
