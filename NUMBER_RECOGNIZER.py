@@ -50,7 +50,7 @@ def classify0(inX, dataSet, labels, k):
         classCount[voteIlabel] = classCount.get(voteIlabel,0) + 1
     sortedClassCount = sorted(classCount.iteritems(),key=operator.itemgetter(1),reverse=True)
     # print classCount
-    # print sortedClassCount
+    print sortedClassCount
     return sortedClassCount[0][0]
     
 def img2txt(filename,imagedata):
@@ -78,9 +78,12 @@ def txt2vector(filename):
 
 print "FILES TO BE SCANNED ARE:"
 file_list = [f for f in os.listdir('./testDigits/') if f.endswith('.png') or f.endswith('.jpg') or f.endswith('.gif')]
-print file_list
+no_of_files = len(file_list)
+for i in range(no_of_files):
+   print str(i+1)+'.'+ file_list[i]
 
 print "PREPARING TRAINING MATRIX..."
+
 labels = []
 trainingFileList = listdir('trainingDigits')
 m = len(trainingFileList)
@@ -91,9 +94,10 @@ for i in pbar(range(m)):
         classNumStr = int(fileStr.split('_')[0])
         labels.append(classNumStr)
         trainingMat[i,:] = txt2vector("trainingDigits/%s" % fileNameStr)
+
 print "TRAINING MATRIX PREPARED"
 
-
+num_correct = 0.0 # counter for number of correct identifications by machine
 for filename in file_list:
         #display status for each file
         print "working on "+ filename
@@ -115,8 +119,8 @@ for filename in file_list:
         #make vector from text file data
         file_vector = txt2vector(txt_file_name)
         
-
-        classifier_result = classify0(file_vector,trainingMat,labels,5)
+        
+        classifier_result = classify0(file_vector,trainingMat,labels,3)
 
         #audio configurations
         engine = pyttsx.init()
@@ -132,4 +136,10 @@ for filename in file_list:
             check_file_list = [f for f in os.listdir('./trainingDigits/') if f.startswith(check_string)]
             new_file_name = check_string+str(len(check_file_list))+'.txt'
             os.rename(txt_file_name, "trainingDigits/"+new_file_name)
+        else:
+            num_correct += 1
         print "END "+ filename
+
+print "Accuracy: "+str((num_correct/float(no_of_files))*100.0) + " %"
+
+raw_input("press any key to exit....")
