@@ -10,7 +10,7 @@ from progressbar import ProgressBar
 
 pbar = ProgressBar()
 
-def classify0(inX, dataSet, labels, k):
+def classifier(inX, dataSet, labels, k):
     # inX - input vector to classify
     # dataSet - training examples
     # labels - vector of lables
@@ -120,7 +120,7 @@ for filename in file_list:
         file_vector = txt2vector(txt_file_name)
         
         
-        classifier_result = classify0(file_vector,trainingMat,labels,3)
+        classifier_result = classifier(file_vector,trainingMat,labels,3)
 
         #audio configurations
         engine = pyttsx.init()
